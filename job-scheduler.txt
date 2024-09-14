@@ -1,0 +1,75 @@
+import heapq
+import time
+
+class Job:
+    def __init__(self, job_id, priority):
+        self.job_id = job_id
+        self.priority = priority
+        self.timestamp = time.time()  # For tracking when the job was added
+
+    def __lt__(self, other):
+        # Compare based on priority, and if equal, compare based on timestamp
+        if self.priority == other.priority:
+            return self.timestamp < other.timestamp
+        return self.priority < other.priority
+
+    def __repr__(self):
+        return f"Job({self.job_id}, Priority: {self.priority})"
+
+class JobScheduler:
+    def __init__(self):
+        self.heap = []
+        self.job_map = {}  # Map job_id to jobs for quick lookup
+
+    def add_job(self, job_id, priority):
+        job = Job(job_id, priority)
+        heapq.heappush(self.heap, job)
+        self.job_map[job_id] = job
+        print(f"Added: {job}")
+
+    def pop_job(self):
+        if self.heap:
+            job = heapq.heappop(self.heap)
+            del self.job_map[job.job_id]
+            print(f"Popped: {job}")
+            return job
+        print("No jobs available")
+        return None
+
+    def peek_job(self):
+        if self.heap:
+            job = self.heap[0]
+            print(f"Peek: {job}")
+            return job
+        print("No jobs available")
+        return None
+
+    def update_priority(self, job_id, new_priority):
+        if job_id in self.job_map:
+            job = self.job_map[job_id]
+            print(f"Updating priority for job {job_id} to {new_priority}")
+            job.priority = new_priority
+            # Rebuild the heap
+            heapq.heapify(self.heap)
+        else:
+            print(f"Job {job_id} not found")
+
+    def delete_job(self, job_id):
+        if job_id in self.job_map:
+            job = self.job_map[job_id]
+            self.heap.remove(job)
+            heapq.heapify(self.heap)
+            del self.job_map[job_id]
+            print(f"Deleted: {job}")
+        else:
+            print(f"Job {job_id} not found")
+
+# Example Usage:
+scheduler = JobScheduler()
+scheduler.add_job("job1", 2)
+scheduler.add_job("job2", 1)
+scheduler.peek_job()
+scheduler.pop_job()
+scheduler.update_priority("job1", 0)
+scheduler.peek_job()
+scheduler.delete_job("job1")
